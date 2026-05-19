@@ -1,171 +1,246 @@
-Mini Search Engine (C++)
+# Mini Search Engine in C++
 
-A toy search engine built in C++ to learn object-oriented design, class interactions, and basic information retrieval concepts.
+A small command-line search engine written in C++ for learning object-oriented design and basic information retrieval concepts.
 
-Goal
+The project indexes a fixed set of in-memory documents, accepts queries from the terminal, and returns matching document IDs ranked by a simple frequency-based score.
 
-This project was built to understand C++ OOP by implementing a simplified search engine architecture from scratch.
+## Features
 
-Concepts practiced:
+- Tokenizes document text and user queries
+- Normalizes text to lowercase
+- Treats non-alphanumeric characters as separators
+- Builds an inverted index from words to document frequencies
+- Removes a small set of stop words from queries
+- Scores documents by accumulated term frequency
+- Sorts results by score in descending order
 
-* Classes and objects
-* Encapsulation
-* Composition
-* References and const correctness
-* STL containers (vector, unordered_map, unordered_set)
-* Basic ranking logic
-* Clean separation of responsibilities
+## Concepts Practiced
 
-Architecture
+- Classes and objects
+- Encapsulation
+- Composition
+- `const` correctness and references
+- STL containers such as `vector`, `unordered_map`, and `unordered_set`
+- Basic ranking logic
+- Separation of responsibilities between parser, indexer, query processor, and search engine
 
+## Project Structure
+
+```text
+.
+├── README.md
+└── main.cpp
+```
+
+## Architecture
+
+```text
 User Query
-   ↓
+    |
+    v
 QueryProcessor
-   ↓
+    |
+    v
 SearchEngine
-   ↓
+    |
+    v
 Indexer
-   ↓
-Search Results
+    |
+    v
+Ranked Results
+```
 
-Core components:
+### `Document`
 
-Document
-
-Represents a searchable document.
+Represents one searchable document.
 
 Fields:
 
-* id
-* content
+- `id`: unique document ID
+- `content`: raw document text
 
-Parser
+### `Parser`
 
 Converts raw text into normalized tokens.
 
-Responsibilities:
-
-* Tokenization
-* Lowercasing
-* Removing non-alphanumeric separators
-
 Example:
 
-"Apple makes iPhone!!"
-→ ["apple", "makes", "iphone"]
+```text
+Apple makes iPhone!!
+```
 
-Indexer
+becomes:
 
-Builds an inverted index.
+```text
+["apple", "makes", "iphone"]
+```
 
-Structure:
+### `Indexer`
 
+Builds and queries an inverted index.
+
+Internal structure:
+
+```cpp
 unordered_map<string, unordered_map<int, int>>
+```
 
 Meaning:
 
-word -> (docId -> frequency)
+```text
+word -> (document ID -> frequency)
+```
 
 Example:
 
+```text
 "apple" -> {
-   1 : 3,
-   3 : 1
+  1: 1,
+  3: 1,
+  4: 1
 }
+```
 
-QueryProcessor
+### `QueryProcessor`
 
-Processes user queries using the same normalization logic as documents.
+Processes user queries using the same parser as documents, then removes stop words.
+
+Current stop words:
+
+```text
+the, is, a, an, of, to
+```
 
 Example:
 
-"APPLE iphone!!!"
-→ ["apple", "iphone"]
+```text
+APPLE is an iPhone!!!
+```
 
-SearchEngine
+becomes:
 
-Main orchestrator.
+```text
+["apple", "iphone"]
+```
+
+### `SearchEngine`
+
+Coordinates the full search flow.
 
 Responsibilities:
 
-* Add documents
-* Process user queries
-* Query index for every token
-* Compute document scores
-* Return ranked results
+- Add documents to the index
+- Process query text
+- Search the index for every query token
+- Combine scores per document
+- Return ranked results
 
-Search Strategy
+## Search Strategy
 
-For a multi-word query:
+For a multi-word query, each token is searched independently. If a document matches multiple query terms, the frequencies are added together.
 
+Example query:
+
+```text
 apple iphone
+```
 
-Flow:
+Example scores:
 
-1. Query is tokenized
-2. Each token is searched in the index
-3. Matching document frequencies are accumulated
-4. Results are sorted by score descending
-
-Example:
-
+```text
 apple:
-  doc1 -> 3
-  doc2 -> 1
+  doc1 -> 1
+  doc3 -> 1
+  doc4 -> 1
+
 iphone:
-  doc1 -> 2
-  doc3 -> 4
+  doc1 -> 1
+  doc4 -> 1
+```
 
 Combined scores:
 
-doc1 -> 5
-doc2 -> 1
-doc3 -> 4
+```text
+doc1 -> 2
+doc4 -> 2
+doc3 -> 1
+```
 
-Ranked output:
+## Requirements
 
-doc1
-doc3
-doc2
+- A C++17-compatible compiler
+- `g++` or `clang++`
 
-Build
+## Build
 
-Compile with C++17:
+Using `g++`:
 
+```bash
 g++ main.cpp -std=c++17 -o search_engine
+```
 
-or
+Using `clang++`:
 
+```bash
 clang++ main.cpp -std=c++17 -o search_engine
+```
 
-Run
+## Run
 
+```bash
 ./search_engine
+```
 
-Example interaction:
+Example session:
 
-Enter query: apple iphone
-Doc ID: 1 Score: 5
-Doc ID: 3 Score: 4
+```text
+Enter query (type exit to quit): apple iphone
+Doc ID: 1 Score: 2
+Doc ID: 4 Score: 2
+Doc ID: 3 Score: 1
+Enter query (type exit to quit): windows
 Doc ID: 2 Score: 1
+Enter query (type exit to quit): exit
+```
 
-Future Improvements
+Note: documents with the same score may appear in any order because the index uses `unordered_map`.
 
-Planned extensions:
+## Current Dataset
 
-* Stop-word removal
-* Stemming
-* Phrase search
-* AND / OR query support
-* Persistent storage
-* Web crawler
-* HTML parser
-* Ranker abstraction
-* SQLite / RocksDB backend
-* Multithreaded crawling
+The demo indexes these documents in `main.cpp`:
 
-Why this project?
+```text
+1: Apple makes iPhone
+2: Microsoft makes Windows
+3: Apple sells Macbook
+4: iPhone is made by Apple
+```
 
-This is intentionally a learning project, not a production search engine.
+## Limitations
 
-The focus is understanding system decomposition and writing clean C++ OOP code.
+This is a learning project, not a production search engine. Current limitations include:
+
+- Documents are hardcoded in `main.cpp`
+- No persistent storage
+- No phrase search
+- No boolean `AND` / `OR` query operators
+- No stemming or lemmatization
+- No TF-IDF or advanced ranking
+- No web crawling or HTML parsing
+
+## Possible Improvements
+
+- Load documents from files
+- Add persistent storage
+- Add phrase search
+- Add boolean query support
+- Implement stemming
+- Use TF-IDF or BM25 scoring
+- Add a ranker abstraction
+- Add tests
+- Add a SQLite or RocksDB backend
+- Add a crawler and HTML parser
+
+## Purpose
+
+The goal of this project is to understand how a search engine can be decomposed into smaller components while practicing clean C++ OOP design.
