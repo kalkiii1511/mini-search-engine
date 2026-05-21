@@ -8,6 +8,7 @@ private:
 public:
     void addDocument(const int docId);
     const std::unordered_map<int,int>& getPostings() const;
+    int getDocumentFrequency() const;
 };
 
 #endif

@@ -7,3 +7,7 @@ void PostingList::addDocument(const int docId){
 const std::unordered_map<int, int>& PostingList::getPostings() const{
     return postings;
 }
+
+int PostingList::getDocumentFrequency() const{
+    return postings.size();
+}

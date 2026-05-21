@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 
-std::vector<std::string> stopWordRemover::remove(const std::vector<std::string> &words){
+std::vector<std::string> stopWordRemover::remove(const std::vector<std::string> &words) const{
     std::vector<std::string> filtered;
     for(const auto& word : words){
         if(stopWords.find(word) == stopWords.end()){

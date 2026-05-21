@@ -1,7 +1,7 @@
 #include "parser/Tokenizer.hpp"
 #include <cctype>
 
-std::vector<std::string> Tokenizer::tokenize(const std::string &content){
+std::vector<std::string> Tokenizer::tokenize(const std::string &content) const{
     std::vector<std::string> words;
     std::string buffer;
     int i=0;

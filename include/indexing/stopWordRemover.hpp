@@ -11,7 +11,7 @@ private:
 
 public:
     stopWordRemover();
-    std::vector<std::string> remove(const std::vector<std::string>& words);
+    std::vector<std::string> remove(const std::vector<std::string>& words) const;
 };
 
 #endif
