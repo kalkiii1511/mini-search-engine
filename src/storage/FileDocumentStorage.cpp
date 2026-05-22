@@ -5,7 +5,7 @@
 #include <cstdio>
 
 void FileDocumentStorage::saveDocument(const Document &doc){
-    std::string filePath = BASE_PATH + std::to_string(doc.getId())+ ".txt";
+    std::string filePath = std::string(BASE_PATH) + std::to_string(doc.getId())+ ".txt";
     std::ofstream out(filePath);
     if(!out){
         throw std::runtime_error( "failed to open file for writing" );
