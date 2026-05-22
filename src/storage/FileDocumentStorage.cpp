@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <cstdio>
 
 void FileDocumentStorage::saveDocument(const Document &doc){
     std::string filePath = BASE_PATH + std::to_string(doc.getId())+ ".txt";
@@ -67,4 +68,14 @@ Document FileDocumentStorage::loadDocument(int docId) const{
     doc.setExtractedText(extractedText.str());
 
     return doc;
+}
+
+void FileDocumentStorage::deleteDocument(int docId)
+{
+    std::string filePath =
+        std::string(BASE_PATH) +
+        std::to_string(docId) +
+        ".txt";
+
+    std::remove(filePath.c_str());
 }

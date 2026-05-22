@@ -7,6 +7,7 @@ class DocumentStorage {
 public:
     virtual void saveDocument(const Document& doc) = 0;
     virtual Document loadDocument(int docId) const = 0;
+    virtual void deleteDocument(int docId) = 0;
     virtual ~DocumentStorage() = default;
 };
 

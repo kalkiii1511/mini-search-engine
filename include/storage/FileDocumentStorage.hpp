@@ -11,6 +11,7 @@ private:
 public:
     void saveDocument(const Document& doc) override;
     Document loadDocument(int docId) const override;
+    void deleteDocument(int docId) override;
 };
 
 #endif
