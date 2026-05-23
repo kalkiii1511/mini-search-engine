@@ -1,246 +1,175 @@
 # Mini Search Engine in C++
 
-A small command-line search engine written in C++ for learning object-oriented design and basic information retrieval concepts.
+A small modular C++ search engine for learning crawling, parsing, indexing, query processing, and ranking.
 
-The project indexes a fixed set of in-memory documents, accepts queries from the terminal, and returns matching document IDs ranked by a simple frequency-based score.
+The current executable reads seed URLs from `data/seeds.txt`, crawls those pages, extracts text from the HTML, saves the documents under `data/Documents/`, builds an inverted index, and searches it from the terminal using TF-IDF scoring.
 
 ## Features
 
-- Tokenizes document text and user queries
-- Normalizes text to lowercase
-- Treats non-alphanumeric characters as separators
-- Builds an inverted index from words to document frequencies
-- Removes a small set of stop words from queries
-- Scores documents by accumulated term frequency
-- Sorts results by score in descending order
-
-## Concepts Practiced
-
-- Classes and objects
-- Encapsulation
-- Composition
-- `const` correctness and references
-- STL containers such as `vector`, `unordered_map`, and `unordered_set`
-- Basic ranking logic
-- Separation of responsibilities between parser, indexer, query processor, and search engine
+- Parses simple HTML into a DOM tree
+- Extracts visible text from parsed HTML
+- Tokenizes and normalizes text
+- Removes stop words from documents and queries
+- Applies a simple stemmer
+- Builds an inverted index from terms to document postings
+- Ranks results with TF-IDF
+- Includes crawler, storage, parser, indexing, query, and ranking modules
 
 ## Project Structure
 
 ```text
 .
-├── README.md
-└── main.cpp
+├── CMakeLists.txt
+├── data/
+│   ├── seeds.txt
+│   └── stopWords.txt
+├── include/
+│   ├── core/
+│   ├── crawler/
+│   ├── indexing/
+│   ├── parser/
+│   ├── query/
+│   ├── ranking/
+│   └── storage/
+├── src/
+│   ├── core/
+│   ├── crawler/
+│   ├── indexing/
+│   ├── parser/
+│   ├── query/
+│   ├── ranking/
+│   ├── storage/
+│   └── main.cpp
+├── tests/
+│   ├── crawler/
+│   ├── indexing/
+│   ├── parser/
+│   ├── query/
+│   ├── ranking/
+│   └── storage/
+└── MVP-model.cpp
 ```
 
-## Architecture
+`MVP-model.cpp` is the older single-file prototype. The CMake build uses the modular code under `include/` and `src/`.
+
+## Core Flow
 
 ```text
-User Query
+HTML Document
     |
     v
-QueryProcessor
+HTMLParser + TextExtractor
     |
     v
 SearchEngine
     |
     v
-Indexer
+Indexer + InvertedIndex
     |
     v
-Ranked Results
+QueryProcessor
+    |
+    v
+TFIDFRanker
+    |
+    v
+SearchResult list
 ```
 
-### `Document`
+## Important Classes
 
-Represents one searchable document.
-
-Fields:
-
-- `id`: unique document ID
-- `content`: raw document text
-
-### `Parser`
-
-Converts raw text into normalized tokens.
-
-Example:
-
-```text
-Apple makes iPhone!!
-```
-
-becomes:
-
-```text
-["apple", "makes", "iphone"]
-```
-
-### `Indexer`
-
-Builds and queries an inverted index.
-
-Internal structure:
-
-```cpp
-unordered_map<string, unordered_map<int, int>>
-```
-
-Meaning:
-
-```text
-word -> (document ID -> frequency)
-```
-
-Example:
-
-```text
-"apple" -> {
-  1: 1,
-  3: 1,
-  4: 1
-}
-```
-
-### `QueryProcessor`
-
-Processes user queries using the same parser as documents, then removes stop words.
-
-Current stop words:
-
-```text
-the, is, a, an, of, to
-```
-
-Example:
-
-```text
-APPLE is an iPhone!!!
-```
-
-becomes:
-
-```text
-["apple", "iphone"]
-```
-
-### `SearchEngine`
-
-Coordinates the full search flow.
-
-Responsibilities:
-
-- Add documents to the index
-- Process query text
-- Search the index for every query token
-- Combine scores per document
-- Return ranked results
-
-## Search Strategy
-
-For a multi-word query, each token is searched independently. If a document matches multiple query terms, the frequencies are added together.
-
-Example query:
-
-```text
-apple iphone
-```
-
-Example scores:
-
-```text
-apple:
-  doc1 -> 1
-  doc3 -> 1
-  doc4 -> 1
-
-iphone:
-  doc1 -> 1
-  doc4 -> 1
-```
-
-Combined scores:
-
-```text
-doc1 -> 2
-doc4 -> 2
-doc3 -> 1
-```
+- `Document`: stores document ID, URL, raw HTML, and extracted text.
+- `SearchEngine`: coordinates document preparation, indexing, query processing, and result lookup.
+- `HTMLParser`: parses simple HTML into a `DOMTree`.
+- `TextExtractor`: extracts searchable text from a `DOMTree`.
+- `Tokenizer`: converts text into lowercase terms.
+- `stopWordRemover`: removes common terms loaded from `data/stopWords.txt`.
+- `Indexer`: tokenizes, filters, stems, and inserts terms into the inverted index.
+- `QueryProcessor`: parses queries and gathers posting lists.
+- `TFIDFRanker`: scores and sorts matching documents.
 
 ## Requirements
 
-- A C++17-compatible compiler
-- `g++` or `clang++`
+- C++17-compatible compiler
+- CMake 3.16 or newer
+- libcurl development package, because the crawler module uses curl
 
 ## Build
 
-Using `g++`:
-
 ```bash
-g++ main.cpp -std=c++17 -o search_engine
+cmake -S . -B build
+cmake --build build
 ```
 
-Using `clang++`:
+## Test
 
 ```bash
-clang++ main.cpp -std=c++17 -o search_engine
+cmake --build build --target search_engine_tests
+ctest --test-dir build --output-on-failure
+```
+
+The test tree is organized by module:
+
+```text
+tests/
+├── parser/
+│   ├── ParserTests.cpp
+│   └── HTMLParserTests.cpp
+├── indexing/
+│   ├── IndexerTests.cpp
+│   └── StemmerTests.cpp
+├── query/
+│   └── QueryProcessorTests.cpp
+├── ranking/
+│   └── RankerTests.cpp
+├── crawler/
+│   └── CrawlerTests.cpp
+└── storage/
+    └── StorageTests.cpp
 ```
 
 ## Run
 
-```bash
-./search_engine
-```
-
-Example session:
+Add one seed URL per line:
 
 ```text
-Enter query (type exit to quit): apple iphone
-Doc ID: 1 Score: 2
-Doc ID: 4 Score: 2
-Doc ID: 3 Score: 1
-Enter query (type exit to quit): windows
-Doc ID: 2 Score: 1
+https://example.com
+https://example.org
+```
+
+Then run from the repository root so the app can find `data/seeds.txt` and `data/stopWords.txt`:
+
+```bash
+./build/search_engine
+```
+
+You can also pass a different seed file:
+
+```bash
+./build/search_engine /path/to/seeds.txt
+```
+
+Example:
+
+```text
+Crawled and indexed documents: 2
+Enter query (type exit to quit): example domain
+Doc ID: 1 Score: 1 URL: https://example.com
 Enter query (type exit to quit): exit
 ```
 
-Note: documents with the same score may appear in any order because the index uses `unordered_map`.
+## Current Notes
 
-## Current Dataset
-
-The demo indexes these documents in `main.cpp`:
-
-```text
-1: Apple makes iPhone
-2: Microsoft makes Windows
-3: Apple sells Macbook
-4: iPhone is made by Apple
-```
+- `SearchEngine` lives in `include/core/SearchEngine.hpp` and `src/core/SearchEngine.cpp`.
+- If a document has raw HTML but no extracted text, `SearchEngine::addDocument()` parses the HTML and extracts text before indexing.
+- `SearchEngine::crawlFromSeeds()` creates a crawler, loads URLs from `data/seeds.txt`, and indexes each successfully crawled page.
+- `HTMLParser` is intentionally basic and will not handle every real-world HTML edge case yet.
 
 ## Limitations
 
-This is a learning project, not a production search engine. Current limitations include:
-
-- Documents are hardcoded in `main.cpp`
-- No persistent storage
 - No phrase search
-- No boolean `AND` / `OR` query operators
-- No stemming or lemmatization
-- No TF-IDF or advanced ranking
-- No web crawling or HTML parsing
-
-## Possible Improvements
-
-- Load documents from files
-- Add persistent storage
-- Add phrase search
-- Add boolean query support
-- Implement stemming
-- Use TF-IDF or BM25 scoring
-- Add a ranker abstraction
-- Add tests
-- Add a SQLite or RocksDB backend
-- Add a crawler and HTML parser
-
-## Purpose
-
-The goal of this project is to understand how a search engine can be decomposed into smaller components while practicing clean C++ OOP design.
+- No boolean query operators
+- No persistent index
+- Simple stemming only
+- Basic HTML parser
+- Lightweight assert-based tests instead of a full test framework

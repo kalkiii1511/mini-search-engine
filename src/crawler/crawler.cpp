@@ -50,7 +50,7 @@ void Crawler::loadSeedURLs(
     }
 }
 
-void Crawler::crawl()
+int Crawler::crawl()
 {
 
     int crawledPages = 0;
@@ -120,4 +120,6 @@ void Crawler::crawl()
 
         crawledPages++;
     }
+
+    return crawledPages;
 }

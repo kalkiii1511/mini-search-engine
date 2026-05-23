@@ -14,7 +14,11 @@ std::vector<std::string> stopWordRemover::remove(const std::vector<std::string> 
 }
 
 stopWordRemover::stopWordRemover(){
-    std::ifstream file("../data/stopWords.txt");
+    std::ifstream file("data/stopWords.txt");
+    if (!file.is_open()) {
+        file.open("../data/stopWords.txt");
+    }
+
     if(!file.is_open()){
         std::cout << "there is an error in opening the file stopWords.txt" <<std::endl;
         return;

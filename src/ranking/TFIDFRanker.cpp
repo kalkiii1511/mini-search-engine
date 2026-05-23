@@ -30,7 +30,8 @@ std::vector<SearchResult> TFIDFRanker::rank(
         }
 
         double idf = std::log(
-            static_cast<double>(totalDocs) / df);
+            (static_cast<double>(totalDocs) + 1.0) /
+            (static_cast<double>(df) + 1.0)) + 1.0;
 
         int qtf = queryFreq.at(uniqueTerms[i]);
 

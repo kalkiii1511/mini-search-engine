@@ -41,7 +41,7 @@ public:
 
     void addSeedURL(const std::string &url);
     void loadSeedURLs(const std::string &filePath);
-    void crawl();
+    int crawl();
 };
 
 #endif
