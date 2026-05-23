@@ -26,7 +26,6 @@ set(SEARCH_ENGINE_CORE_SOURCES
     src/parser/DOMTree.cpp
     src/parser/HTMLParser.cpp
     src/parser/LinkExtractor.cpp
-    src/parser/MetaDataExtractor.cpp
     src/parser/TextExtractor.cpp
     src/parser/Tokenizer.cpp
     src/query/QueryParser.cpp
