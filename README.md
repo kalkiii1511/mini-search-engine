@@ -101,11 +101,23 @@ cmake -S . -B build
 cmake --build build
 ```
 
+Or configure, build, and start the program with one command:
+
+```bash
+./run.sh
+```
+
 ## Test
 
 ```bash
 cmake --build build --target search_engine_tests
 ctest --test-dir build --output-on-failure
+```
+
+To configure, build, and run the test program with one command:
+
+```bash
+./run_tests.sh
 ```
 
 The test tree is organized by module:
@@ -147,6 +159,8 @@ You can also pass a different seed file:
 
 ```bash
 ./build/search_engine /path/to/seeds.txt
+# or
+./run.sh /path/to/seeds.txt
 ```
 
 Example:
